@@ -1,0 +1,69 @@
+import pygame as p
+from blockGeneration import BlockGenerator
+from cannon import Cannon
+
+# from scoreboard import 
+
+
+def createUpdateWindow():
+    background_colour = (0, 0, 0)
+    screen_width = 800
+    screen_height = 800
+    screen = p.display.set_mode((screen_width, screen_height))
+    screen.fill(background_colour)
+    p.display.flip()
+    return screen  # Return the screen surface
+def main():
+    p.init()
+    clock = p.time.Clock()
+    screen = createUpdateWindow()
+
+    # Create a background surface same size as screen
+    background_surface = p.Surface(screen.get_size())
+    background_surface.fill((0, 0, 0)) 
+
+
+    genBlocks = BlockGenerator(1, (0, 0, 0), screen.get_width())
+    genBlocks.generateBlock(background_surface)
+
+    buildCannon = Cannon(screen.get_width())
+    buildCannon.make_cannon(screen) 
+    
+    fillCannon = Cannon(screen.get_width())
+    fillCannon.cannon_bullets(screen)
+
+    running = True
+    while running:
+        for event in p.event.get():
+            if event.type == p.QUIT:
+                running = False
+
+        
+
+        # Draw static background ONCE per frame
+        screen.blit(background_surface, (0, 0))
+
+        # Draw dynamic cannon on top
+        buildCannon.draw_cannon(screen)
+        keys = p.key.get_pressed()
+        buildCannon.cannon_movement_and_border(keys)
+        fillCannon.draw_bullets(screen)
+        
+
+
+        p.display.flip()
+        clock.tick(60)
+
+    p.quit()
+
+if __name__ == "__main__":
+    main()
+
+
+
+
+
+
+
+
+
