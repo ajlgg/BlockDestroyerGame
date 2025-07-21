@@ -1,60 +1,98 @@
 import pygame as p
-import blockGeneration 
+
 
 class Cannon:
-    def __init__(self, screen_width):
-        self.cannon_img = None
-        self.cannonXpos = 400
-        self.cannonYpos = 650
-        self.resize_cannon_img = None 
+    def __init__(self, screen_width, screen_height):
+        self.screen_width = screen_width
+        self.screen_height = screen_height
         self.cannonWidth = 100
         self.cannonHeight = 100
-        self.screen_width = screen_width
-        self.ball_img = None
-        self.resize_ball_img = None
+        self.cannonXpos = 350
+        self.cannonYpos = 650
+        self.cannon_img = None
+        self.resize_cannon_img = None
+        self.load_cannon_image()
+
         self.ballWidth = 30
         self.ballHeight = 30
-        self.ballXpos = 400
-        self.ballYpos = 500
+        self.ballXpos = 385
+        self.ballYpos = 630
+        self.ball_img = None
+        self.resize_ball_img = None
+        self.bullet_in_motion = None
+        self.bullet_mask = None
+        self.bullet_speed = 5
+        self.load_ball_image()
+        
 
-
-    def make_cannon(self, screen):
+    def load_cannon_image(self):
         try:
             self.cannon_img = p.image.load("cannonBOOM.png")
-            self.resize_cannon_img = p.transform.scale(self.cannon_img, (self.cannonWidth, self.cannonHeight))
+            self.resize_cannon_img = p.transform.scale(
+                self.cannon_img, (self.cannonWidth, self.cannonHeight)
+            )
         except Exception as e:
-            print(f"Error loading image: {e}")
-            return
+            print(f"Error loading cannon image: {e}")
 
-        screen.blit(self.resize_cannon_img, (self.cannonXpos, self.cannonYpos))
+    def make_cannon(self, screen):
+        if self.resize_cannon_img:
+            screen.blit(self.resize_cannon_img, (self.cannonXpos, self.cannonYpos))
 
     def draw_cannon(self, screen):
-        screen.blit(self.resize_cannon_img, (self.cannonXpos, self.cannonYpos))
+        if self.resize_cannon_img:
+            screen.blit(self.resize_cannon_img, (self.cannonXpos, self.cannonYpos))
 
     def cannon_movement_and_border(self, keys):
-        x = 5
-        if keys[p.K_a]:
-            if self.cannonXpos > 0:
-                self.cannonXpos -= x
-        if keys[p.K_d]:
-            if self.cannonXpos < self.screen_width - self.cannonWidth:
-                self.cannonXpos += x
+        speed = 5
+        if keys[p.K_a] and self.cannonXpos > 0:
+                self.cannonXpos -= speed
+                self.ballXpos -= speed
+        if keys[p.K_d] and self.cannonXpos < self.screen_width - self.cannonWidth:
+                self.cannonXpos += speed
+                self.ballXpos += speed
 
-    def cannon_bullets(self, screen):
-        try:
-            self.ball_img = p.image.load("BALLS.png")
-            self.resize_ball_img = p.transform.scale(self.ball_img, (self.ballWidth, self.ballHeight))
-        except Exception as e:
-            print(f"Error loading image: {e}")
-            return
-        screen.blit(self.resize_ball_img, (self.ballXpos, self.ballYpos))
+    def load_ball_image(self):
+            try:
+                self.ball_img = p.image.load("BALLS.png").convert_alpha()
+                self.resize_ball_img = p.transform.scale(
+                    self.ball_img, (self.ballWidth, self.ballHeight)
+                )
+                self.bullet_mask = p.mask.from_surface(self.resize_ball_img)
+            except Exception as e:
+                print(f"Error loading ball image: {e}")
 
     def draw_bullets(self, screen):
-        screen.blit(self.resize_ball_img, (self.ballXpos, self.ballYpos))
+        if self.resize_ball_img:
+            screen.blit(self.resize_ball_img, (self.ballXpos, self.ballYpos))
 
-    def cannon_ball_fire(self):
-        pass
-        # for the cannon ball fire we want to make sure that the cannon ball image starts at a certain location
-        # this location would be behind the cannon or inside the cannon on the screen
-        # then we want to have the ball move upward when we press the space bar key 
+    def fire_bullet(self):
+        if not self.bullet_in_motion:
+            self.ballXpos = self.cannonXpos + (self.cannonWidth // 2) - (self.ballWidth // 2)
+            self.ballYpos = self.cannonYpos
+            self.bullet_in_motion = True
+
+    def reset_bullet(self):
+         self.ballXpos = self.cannonXpos + (self.cannonWidth // 2) - (self.ballWidth // 2)
+         self.ballYpos = self.cannonYpos
+         self.bullet_in_motion = False
+
+    def update_bullet(self):
+        if self.bullet_in_motion:
+             self.ballYpos -= self.bullet_speed
+             if self.ballYpos <= 0:
+                  self.reset_bullet()
+    
+    
+
+
+
+
+    
+        
+        
+        
+            
+
+
+
         

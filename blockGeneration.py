@@ -1,12 +1,14 @@
 import pygame as p
 import random
 
+
 class BlockGenerator:
     def __init__(self, numBlocks, randColors, screen_width):
         self.numBlocks = numBlocks
         self.randColors = randColors
         self.blocksize = 50
         self.screen_width = screen_width
+        self.blocks = []  # Store block data here
 
     def randomBlockColor(self):
         return (
@@ -16,11 +18,11 @@ class BlockGenerator:
         )
 
     def randomNumberBlocks(self):
-        self.numBlocks = random.randint(1, 5)
+        self.numBlocks = random.randint(10, 30)
 
     def generateBlock(self, screen):
         self.randomNumberBlocks()
-        placed_blocks = []
+        self.blocks = []  # Clear previous blocks
 
         screen_height = screen.get_height() 
 
@@ -29,27 +31,40 @@ class BlockGenerator:
 
             placed = False
             while not placed:
-                
                 x = random.randint(0, self.screen_width - self.blocksize)
-               
                 y = random.randint(0, (screen_height // 2) - self.blocksize)
                 new_rect = p.Rect(x, y, self.blocksize, self.blocksize)
 
-                # there is no collision detection taking place so just set that to false
-
                 collision = False
-                # now we want to set a variable block and loop that into the list placed_blocks
-                for block in placed_blocks:
-                    # we want to use new_rect now to check if any of the rects in placed_blocks are touching or colliding
-                    if new_rect.colliderect(block):
-                        # if this is true then break the program
+                for block in self.blocks:
+                    if new_rect.colliderect(block['rect']):
                         collision = True
                         break
-                # otherwise check if there is no collision then append the new_rect to the list and then draw it on the screen
+
                 if not collision:
-                    placed_blocks.append(new_rect)
-                    p.draw.rect(screen, color, new_rect)
+                    # Create a surface for the block
+                    block_surface = p.Surface((self.blocksize, self.blocksize), p.SRCALPHA)
+                    block_surface.fill(color)
+
+                    # Create the mask
+                    block_mask = p.mask.from_surface(block_surface)
+
+                    # Store block data
+                    self.blocks.append({
+                        'rect': new_rect,
+                        'surface': block_surface,
+                        'mask': block_mask,
+                        'color': color
+                    })
+
+                    screen.blit(block_surface, (new_rect.x, new_rect.y))
                     placed = True
+
+    def draw_Blocks(self, screen):
+        for block in self.blocks:
+            screen.blit(block['surface'], (block['rect'].x, block['rect'].y))
+
+
         
 
                 
